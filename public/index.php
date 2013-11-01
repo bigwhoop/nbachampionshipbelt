@@ -208,6 +208,7 @@ ob_start();
                 <table>
                     <thead>
                         <tr>
+                            <th>Date</th>
                             <th>Home Team</th>
                             <th>Score</th>
                             <th>Away Team</th>
@@ -234,6 +235,7 @@ ob_start();
                             $streak++;
                             ?>
                             <tr>
+                                <td><?= $game->getDate()->format('Y-m-d'); ?></td>
                                 <td><?= $game->getHomeTeam()->getName(); ?></td>
                                 <td><?= $game->getScore();; ?></td>
                                 <td><?= $game->getAwayTeam()->getName(); ?></td>
