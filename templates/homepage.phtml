@@ -48,9 +48,18 @@ function getTeamLogoImgTag(Team $team) {
                 font-size: 12px;
             }
             
-            #container { margin: 20px; }
+            #container {
+                margin: 20px;
+            }
             
-            h1 { font-weight: normal; font-size: 38px; margin: 0 0 5px 0; }
+            #logo {
+                width: 300px;
+                height: 202px;
+                margin-bottom: 40px;
+                background: url(/img/logo.png) no-repeat;
+            }
+            
+            h1 { font-weight: normal; font-size: 38px; margin: 50px 0 5px 0; }
             h2 { font-weight: normal; font-size: 16px; margin: 16px 0 8px 0; text-transform: uppercase; }
             
             li { margin-left: 20px; }
@@ -59,7 +68,7 @@ function getTeamLogoImgTag(Team $team) {
             .champs p img { vertical-align: middle; }
             .champs p { line-height: 24px; }
             
-            .seasons { margin: 0 0 20px 0; }
+            .seasons { margin: 0 0 20px 0; max-width: 400px; }
             .title-winner { font-size: 32px; }
             
             .next-battle { text-align: center; }
@@ -72,9 +81,10 @@ function getTeamLogoImgTag(Team $team) {
             th { background-color: #777; color: #fff; }
             th[colspan] { text-align: center; }
             td img { vertical-align: middle; }
+            tr { background-color: #fff; }
             tr:nth-child(even) { background-color: #f5f5f5; }
             
-            .col { float: left; margin: 0 50px 20px 0; }
+            .row   { float: left; margin: 0 50px 20px 0; }
             .clear { clear: left; }
         </style>
         <script>
@@ -89,19 +99,25 @@ function getTeamLogoImgTag(Team $team) {
     </head>
     <body>
         <div id="container">
-            <h1>NBA Championship Belt <?= $this->get('season'); ?>/<?= $this->get('season') + 1; ?></h1>
+            <div id="logo" class="row"></div>
             
-            <p class="seasons">
-                <?php foreach (array_keys($availableSeasons) as $season): ?>
-                    <?php if ($season == $this->get('season')): ?>
-                        <?= $season; ?>/<?= $season + 1; ?>
-                    <?php else: ?>
-                        <a href="?season=<?= $season; ?>"><?= $season; ?>/<?= $season + 1; ?></a>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </p>
+            <div class="row">
+                <h1>NBA Championship Belt <?= $this->get('season'); ?>/<?= $this->get('season') + 1; ?></h1>
+                
+                <p class="seasons">
+                    <?php foreach (array_keys($availableSeasons) as $season): ?>
+                        <?php if ($season == $this->get('season')): ?>
+                            <?= $season; ?>/<?= $season + 1; ?>
+                        <?php else: ?>
+                            <a href="?season=<?= $season; ?>"><?= $season; ?>/<?= $season + 1; ?></a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </p>
+            </div>
             
-            <div class="col">
+            <div class="clear"></div>
+            
+            <div class="row">
                 <?php if ($this->get('isRunningSeason')): ?>
                     <h2>Holder of Champ. Belt</h2>
                 <?php else: ?>
@@ -113,7 +129,7 @@ function getTeamLogoImgTag(Team $team) {
                 </div>
             </div>
             
-            <div class="col">
+            <div class="row">
                 <h2>NBA Champs</h2>
                 <div class="champs">
                     <p>
@@ -131,7 +147,7 @@ function getTeamLogoImgTag(Team $team) {
                 </div>
             </div>
             
-            <div class="col">
+            <div class="row">
                 <h2>Rules</h2>
                 <ul>
                     <li>It starts with the first game of last season's NBA champion.</li>
@@ -140,7 +156,7 @@ function getTeamLogoImgTag(Team $team) {
                 </ul>
             </div>
             
-            <div class="col">
+            <div class="row">
                 <h2>Data Sources</h2>
                 <p>
                     Idea: <a href="http://www.reddit.com/r/nba/comments/1pn9t2/can_we_keep_track_of_the_owner_of_the/">/u/hckygod91 on reddit</a><br>
@@ -152,7 +168,7 @@ function getTeamLogoImgTag(Team $team) {
             
             <div class="clear"></div>
         
-            <div class="col">
+            <div class="row">
                 <h2>Game Log</h2>
                 <table>
                     <thead>
@@ -213,7 +229,7 @@ function getTeamLogoImgTag(Team $team) {
                 <?php endif; ?>
             </div>
             
-            <div class="col">
+            <div class="row">
                 <h2>Stats</h2>
                 <table>
                     <thead>
