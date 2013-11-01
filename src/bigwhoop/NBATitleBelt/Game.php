@@ -37,6 +37,15 @@ class Game
 
 
     /**
+     * @return bool
+     */
+    public function wasPlayed()
+    {
+        return $this->homeTeamScore > 0 && $this->awayTeamScore > 0;
+    }
+
+
+    /**
      * @return \DateTime
      */
     public function getDate()

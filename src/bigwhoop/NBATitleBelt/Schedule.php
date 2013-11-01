@@ -31,6 +31,24 @@ class Schedule implements \IteratorAggregate
 
 
     /**
+     * @param Team $beltHolder
+     * @return Game|null
+     */
+    public function getUpcomingChampionshipGame(Team $beltHolder)
+    {
+        foreach ($this->games as $game) {
+            if ($game->wasPlayed()) {
+                continue;
+            }
+            if ($beltHolder->isPlayingIn($game)) {
+                return $game;
+            }
+        }
+        return null;
+    }
+
+
+    /**
      * @return \ArrayIterator
      */
     public function getIterator()

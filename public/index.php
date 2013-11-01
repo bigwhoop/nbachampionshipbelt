@@ -27,6 +27,7 @@ $app->configureMode('development', function() use ($app) {
         'debug'       => true,
         'log.enabled' => true,
         'log.level'   => Log::DEBUG,
+        'app.page.cache.duration' => 0,
     ]);
 });
 
@@ -45,6 +46,14 @@ $app->get('/', function() use ($app) {
     }
     
     $availableSeasons = [
+        2000 => ['defendingChamp' => new Team('LAL')],
+        2001 => ['defendingChamp' => new Team('LAL')],
+        2002 => ['defendingChamp' => new Team('LAL')],
+        2003 => ['defendingChamp' => new Team('SAS')],
+        2004 => ['defendingChamp' => new Team('DET')],
+        2005 => ['defendingChamp' => new Team('SAS')],
+        2006 => ['defendingChamp' => new Team('MIA')],
+        2007 => ['defendingChamp' => new Team('SAS')],
         2008 => ['defendingChamp' => new Team('BOS')],
         2009 => ['defendingChamp' => new Team('LAL')],
         2010 => ['defendingChamp' => new Team('LAL')],
@@ -67,7 +76,7 @@ $app->get('/', function() use ($app) {
     }
     
     try {
-        $parser = new BBReferenceParser(__DIR__ . '/../data/' . $season . '.txt');
+        $parser = new BBReferenceParser(__DIR__ . '/../data/' . $season . '.csv');
         $games = $parser->getGames();
     } catch (\RuntimeException $e) {
         $games = [];
@@ -99,6 +108,7 @@ $app->get('/', function() use ($app) {
         'isRunningSeason'  => $season == CURRENT_SEASON,
         'stats'            => $stats,
         'gameLog'          => $gameLog,
+        'upcomingGame'     => $schedule->getUpcomingChampionshipGame($beltHolder),
     ]);
     
     $content = $view->fetch('homepage.phtml');

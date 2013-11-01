@@ -22,6 +22,10 @@ class Stats implements \IteratorAggregate
             return false;
         }
         
+        if (!$game->wasPlayed()) {
+            return false;
+        }
+        
         $winner = $game->getWinner();
         $this->assertTeamStats($winner)->recordGame(true, $currentBeltHolder->isSame($winner));
         

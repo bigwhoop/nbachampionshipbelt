@@ -40,6 +40,10 @@ class BBReferenceParser implements ParserInterface
         'Brooklyn Nets' => 'BKN',
         'New Jersey Nets' => 'NJN',
         'New Orleans Pelicans' => 'NOP',
+        'New Orleans/Oklahoma City Hornets' => 'NOK',
+        'Seattle SuperSonics' => 'SEA',
+        'Charlotte Hornets' => 'CHH',
+        'Vancouver Grizzlies' => 'VAN',
     ];
     
     
@@ -69,7 +73,7 @@ class BBReferenceParser implements ParserInterface
         $fp = fopen($this->csvPath, 'r');
         
         $a = [];
-        while (($row = fgetcsv($fp, null, ','))) {
+        while (($row = fgetcsv($fp, null, ',', '"'))) {
             $a[] = $row;
         }
         
@@ -88,7 +92,7 @@ class BBReferenceParser implements ParserInterface
         foreach ($data as $row) {
             list($dateStr,,$homeTeamStr,$homeTeamScore,$awayTeamStr,$awayTeamScore) = $row;
             $games[] = new Game(
-                \DateTime::createFromFormat('D M j Y H:i:s', $dateStr . ' 00:00:00'),
+                \DateTime::createFromFormat('D, M j, Y H:i:s', $dateStr . ' 00:00:00'),
                 new Team(self::$teams[$homeTeamStr]),
                 $homeTeamScore,
                 new Team(self::$teams[$awayTeamStr]),

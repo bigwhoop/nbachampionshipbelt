@@ -16,6 +16,9 @@ $thisYearsNBAChamp = array_key_exists($this->get('season') + 1, $availableSeason
                    ? $availableSeasons[$this->get('season') + 1]['defendingChamp']
                    : null;
 
+/** @var Game|null $upcomingChampGame */
+$upcomingChampGame = $this->get('upcomingGame');
+
 /**
  * @param Team $team
  * @return string
@@ -58,6 +61,11 @@ function getTeamLogoImgTag(Team $team) {
             
             .seasons { margin: 0 0 20px 0; }
             .title-winner { font-size: 32px; }
+            
+            .next-battle { text-align: center; }
+            .next-battle .matchup { font-size: 32px; margin-bottom: 8px; }
+            .next-battle .matchup img { vertical-align: baseline; }
+            .next-battle .date { font-size: 16px; }
             
             table { border-collapse: collapse; }
             th, td { border: 1px solid #666; padding: 2px 4px; text-align: left; }
@@ -137,7 +145,8 @@ function getTeamLogoImgTag(Team $team) {
                 <p>
                     Idea: <a href="http://www.reddit.com/r/nba/comments/1pn9t2/can_we_keep_track_of_the_owner_of_the/">/u/hckygod91 on reddit</a><br>
                     Scores: <a href="http://www.basketball-reference.com/">basketball-reference.com</a><br>
-                    Logos: <a href="http://www.nba.com/">nba.com</a>
+                    Logos: <a href="http://www.nba.com/">nba.com</a><br>
+                    Contribute: <a href="https://github.com/bigwhoop/nbachampionshipbelt">bigwhoop/nbachampionshipbelt</a>
                 </p>
             </div>
             
@@ -185,6 +194,23 @@ function getTeamLogoImgTag(Team $team) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                
+                <?php if ($upcomingChampGame): ?>
+                    <div class="next-battle">
+                        <h2>Next Battle for the Belt</h2>
+                        
+                        <div class="matchup">
+                            <?= getTeamLogoImgTag($upcomingChampGame->getAwayTeam()); ?>
+                            <?= $upcomingChampGame->getAwayTeam()->getName(); ?>
+                            @
+                            <?= getTeamLogoImgTag($upcomingChampGame->getHomeTeam()); ?>
+                            <?= $upcomingChampGame->getHomeTeam()->getName(); ?>
+                        </div>
+                        <div class="date">
+                            <?= $upcomingChampGame->getDate()->format('Y-m-d'); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
             
             <div class="col">

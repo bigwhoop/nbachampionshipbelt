@@ -1,7 +1,8 @@
 {
     "require": {
         "php": ">=5.4",
-        "slim/slim": "2.*"
+        "slim/slim": "2.*",
+        "fabpot/goutte": "1.*"
     },
     "autoload": {
         "psr-0": { "bigwhoop\\NBATitleBelt\\": "src/" }
