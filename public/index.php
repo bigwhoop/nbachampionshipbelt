@@ -1,14 +1,20 @@
 <?php
-use bigwhoop\NBATitleBelt\Game;
+namespace App;
+
+use bigwhoop\NBATitleBelt\Stats;
+use bigwhoop\NBATitleBelt\TeamStats;
 use bigwhoop\NBATitleBelt\Team;
+use bigwhoop\NBATitleBelt\Game;
+use bigwhoop\NBATitleBelt\Schedule;
+use bigwhoop\NBATitleBelt\GameLog;
+use bigwhoop\NBATitleBelt\Parser\BBReferenceParser;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-const CACHE_LIFE_TIME = 3600;
+const CACHE_LIFE_TIME = 0;// 3600; // 1 hour
+const CURRENT_SEASON = 2013;
 
 date_default_timezone_set('UTC');
-
-use \bigwhoop\NBATitleBelt\Parser\BBReferenceParser;
 
 /** @var Team[] $prevChampByYear */
 $prevChampByYear = [
@@ -26,6 +32,7 @@ if (!array_key_exists($theYear, $prevChampByYear)) {
     exit("Season $theYear is not available.");
 }
 
+// Try to hit cache.
 $cachePath = __DIR__ . '/../tmp/cache/' . $theYear . '.html';
 if (file_exists($cachePath) && filemtime($cachePath) + CACHE_LIFE_TIME > time()) {
     readfile($cachePath);
@@ -34,86 +41,37 @@ if (file_exists($cachePath) && filemtime($cachePath) + CACHE_LIFE_TIME > time())
 
 $theChamp = $prevChampByYear[$theYear];
 
-$parser = new BBReferenceParser(__DIR__ . '/../data/' . $theYear . '.txt');
-$games = $parser->getGames();
-
-usort($games, function(Game $a, Game $b) {
-    return $a->getDate() > $b->getDate() ? 1 : -1;
-});
-
-
-$holder = $theChamp;
-$stats = [];
-
-/** @var Game[] $gameLog */
-$gameLog = [];
-
-$statsTmpl = [
-    'games' => 0,
-    'wins'  => 0,
-    'won_as_challenger'  => 0,
-    'won_as_defender'    => 0,
-    'losses'  => 0,
-    'lost_as_challenger' => 0,
-    'lost_as_defender'   => 0,
-    'win%'  => 0,
-];
-
-foreach ($games as $game) {
-    $homeTeam = $game->getHomeTeam();
-    $awayTeam = $game->getAwayTeam();
-    
-    if (!array_key_exists($homeTeam->getName(), $stats)) {
-        $stats[$homeTeam->getName()] = $statsTmpl;
-    }
-    
-    if (!array_key_exists($awayTeam->getName(), $stats)) {
-        $stats[$awayTeam->getName()] = $statsTmpl;
-    }
-    
-    if (!$game->getHomeTeam()->isSame($holder) && !$game->getAwayTeam()->isSame($holder)) {
-        continue;
-    }
-    
-    $gameLog[] = $game;
-    
-    $winnerName = $game->getWinner()->getName();
-    $loserName  = $game->getLoser()->getName();
-    
-    $stats[$winnerName]['games']++;
-    $stats[$winnerName]['wins']++;
-    $stats[$loserName]['games']++;
-    $stats[$loserName]['losses']++;
-    
-    foreach ([$winnerName, $loserName] as $teamName) {
-        $stats[$teamName]['win%'] = round($stats[$teamName]['wins'] / $stats[$teamName]['games'] * 100, 2);
-    }
-    
-    if ($holder->isSame($game->getWinner())) {
-        $stats[$winnerName]['won_as_defender']++;
-    } else {
-        $stats[$winnerName]['won_as_challenger']++;
-    }
-    
-    if ($holder->isSame($game->getLoser())) {
-        $stats[$loserName]['lost_as_defender']++;
-    } else {
-        $stats[$loserName]['lost_as_challenger']++;
-    }
-    
-    $holder = $game->getWinner();
+try {
+    $parser = new BBReferenceParser(__DIR__ . '/../data/' . $theYear . '.txt');
+    $games = $parser->getGames();
+} catch (\RuntimeException $e) {
+    $games = [];
 }
 
-if ($theYear == date('Y')) {
-    file_put_contents(__DIR__ . '/leader.json', json_encode(['name' => $holder->getName()]));
+$schedule = new Schedule($games);
+$gameLog  = new GameLog();
+$stats    = new Stats();
+
+$beltHolder = $theChamp;
+foreach ($schedule as $game) {
+    /** @var Game $game */
+    if ($stats->analyzeGame($game, $beltHolder)) {
+        $gameLog->addGame($game);
+        $beltHolder = $game->getWinner();
+    }
 }
 
-uasort($stats, function(array $a, array $b) {
-    if ($a['wins'] == $b['wins']) {
-        return $a['games'] > $b['games'] ? 1 : -1;
-    }
-    return $a['win%'] > $b['win%'] ? -1 : 1;
-});
+/**
+ * @return bool
+ */
+function isActiveSeason() {
+    global $theYear;
+    return $theYear == CURRENT_SEASON;
+}
+
+if (isActiveSeason()) {
+    file_put_contents(__DIR__ . '/leader.json', json_encode(['name' => $beltHolder->getName()]));
+}
 
 
 /**
@@ -131,7 +89,6 @@ function getTeamLogoURL(Team $team) {
 function getTeamLogoImgTag(Team $team) {
     return '<img src="' . getTeamLogoURL($team) . '" alt="' . $team->getName() . '">';
 }
-
 
 ob_start();
 ?>
@@ -172,6 +129,15 @@ ob_start();
             .col { float: left; margin: 0 50px 20px 0; }
             .clear { clear: left; }
         </style>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            
+            ga('create', 'UA-45376063-1', 'nbachampionshipbelt.com');
+            ga('send', 'pageview');
+        </script>
     </head>
     <body>
         <div id="container">
@@ -179,15 +145,23 @@ ob_start();
             
             <p class="seasons">
                 <?php foreach ($prevChampByYear as $year => $champ): ?>
-                    <a href="?season=<?= $year; ?>"><?= $year; ?>/<?= $year + 1; ?></a>
+                    <?php if ($year == $theYear): ?>
+                        <?= $year; ?>/<?= $year + 1; ?>
+                    <?php else: ?>
+                        <a href="?season=<?= $year; ?>"><?= $year; ?>/<?= $year + 1; ?></a>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </p>
             
             <div class="col">
-                <h2>Winner of Title Belt</h2>
+                <?php if (isActiveSeason()): ?>
+                    <h2>Holder of Champ. Belt</h2>
+                <?php else: ?>
+                    <h2>Winner of Champ. Belt</h2>
+                <?php endif; ?>
                 <div class="title-winner">
-                    <?= getTeamLogoImgTag($holder); ?>
-                    <?= $holder->getName(); ?>
+                    <?= getTeamLogoImgTag($beltHolder); ?>
+                    <?= $beltHolder->getName(); ?>
                 </div>
             </div>
             
@@ -246,6 +220,8 @@ ob_start();
                         <?php $lastWinner = null; $streak = 0; $wins = []; ?>
                         <?php foreach ($gameLog as $game): ?>
                             <?php
+                            /** @var Game $game */
+                            
                             $winnerName = $game->getWinner()->getName();
                             if (!array_key_exists($winnerName, $wins)) {
                                 $wins[$winnerName] = 0;
@@ -291,28 +267,32 @@ ob_start();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php $rank = 1; $prevWinPercentage = $prevGames = null; ?>
-                        <?php foreach ($stats as $teamName => $teamStats): ?>
+                        <?php $rank = 1; $prevWinPercentage = $prevNumGames = null; ?>
+                        <?php foreach ($stats as $teamStats): ?>
+                            <?php /** @var TeamStats $teamStats */ ?>
                             <tr>
                                 <td>
                                     <?php
-                                    if ($prevWinPercentage !== $teamStats['win%'] || $prevGames !== $teamStats['games']) {
+                                    $numGames = $teamStats->countGames();
+                                    $winPercentage = $teamStats->calcWinPercentage();
+                                    
+                                    if ($prevWinPercentage !== $winPercentage || $prevNumGames !== $numGames) {
                                         echo $rank . '.';
-                                        $prevGames = $teamStats['games'];
-                                        $prevWinPercentage = $teamStats['win%'];
+                                        $prevNumGames = $numGames;
+                                        $prevWinPercentage = $winPercentage;
                                     }
                                     $rank++;
                                     ?>
                                 </td>
-                                <td><?= getTeamLogoImgTag(new Team($teamName)); ?> <?= $teamName; ?></td>
-                                <td><?= $teamStats['games']; ?></td>
-                                <td><?= $teamStats['wins']; ?></td>
-                                <td><?= $teamStats['won_as_challenger']; ?></td>
-                                <td><?= $teamStats['won_as_defender']; ?></td>
-                                <td><?= $teamStats['losses']; ?></td>
-                                <td><?= $teamStats['lost_as_challenger']; ?></td>
-                                <td><?= $teamStats['lost_as_defender']; ?></td>
-                                <td><?= $teamStats['win%']; ?>%</td>
+                                <td><?= getTeamLogoImgTag($teamStats->getTeam()); ?> <?= $teamStats->getTeam()->getName(); ?></td>
+                                <td><?= $numGames; ?></td>
+                                <td><?= $teamStats->countWins(); ?></td>
+                                <td><?= $teamStats->countWinsAsChallenger(); ?></td>
+                                <td><?= $teamStats->countWinsAsDefender(); ?></td>
+                                <td><?= $teamStats->countLosses(); ?></td>
+                                <td><?= $teamStats->countWinsAsChallenger(); ?></td>
+                                <td><?= $teamStats->countLossesAsDefender(); ?></td>
+                                <td><?= $winPercentage; ?>%</td>
                         <?php endforeach; ?>
                     </tbody>
                 </table>

@@ -33,5 +33,21 @@ class Team
     {
         return $this->getName() == $team->getName();
     }
+
+
+    /**
+     * @param Game $game
+     * @return bool
+     */
+    public function isPlayingIn(Game $game)
+    {
+        if ($game->getHomeTeam()->isSame($this)) {
+            return true;
+        }
+        if ($game->getAwayTeam()->isSame($this)) {
+            return true;
+        }
+        return false;
+    }
 }
  
