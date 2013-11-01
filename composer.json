@@ -1,6 +1,7 @@
 {
     "require": {
-        "php": ">=5.4"
+        "php": ">=5.4",
+        "slim/slim": "2.*"
     },
     "autoload": {
         "psr-0": { "bigwhoop\\NBATitleBelt\\": "src/" }
