@@ -8,13 +8,8 @@ $availableSeasons  = $this->get('availableSeasons');
 /** @var Team $beltHolder */
 $beltHolder        = $this->get('beltHolder');
 
-/** @var Team $lastYearsNBAChamp */
-$lastYearsNBAChamp = $availableSeasons[$this->get('season')]['defendingChamp'];
-
-/** @var Team|null $thisYearsNBAChamp */
-$thisYearsNBAChamp = array_key_exists($this->get('season') + 1, $availableSeasons)
-                   ? $availableSeasons[$this->get('season') + 1]['defendingChamp']
-                   : null;
+/** @var Team $lastYearsChamp */
+$lastYearsChamp    = $availableSeasons[$this->get('season')]['defendingChamp'];
 
 /** @var Game|null $upcomingChampGame */
 $upcomingChampGame = $this->get('upcomingGame');
@@ -65,8 +60,8 @@ function getTeamLogoImgTag(Team $team) {
             li { margin-left: 20px; }
             a { color: #333; }
             
-            .champs p img { vertical-align: middle; }
-            .champs p { line-height: 24px; }
+            .defending-champ { line-height: 24px; }
+            .defending-champ img { vertical-align: middle; }
             
             .seasons { margin: 0 0 20px 0; max-width: 400px; }
             .title-winner { font-size: 32px; }
@@ -130,27 +125,17 @@ function getTeamLogoImgTag(Team $team) {
             </div>
             
             <div class="row">
-                <h2>NBA Champs</h2>
-                <div class="champs">
-                    <p>
-                        <?= getTeamLogoImgTag($lastYearsNBAChamp); ?> <?= $lastYearsNBAChamp->getName(); ?>
-                        (<?= $this->get('season') - 1; ?>/<?= $this->get('season'); ?>)
-                    </p>
-                    <p>
-                        <?php if ($thisYearsNBAChamp): ?>
-                            <?= getTeamLogoImgTag($thisYearsNBAChamp); ?> <?= $thisYearsNBAChamp->getName(); ?>
-                        <?php else: ?>
-                            TBD.
-                        <?php endif; ?>
-                        (<?= $this->get('season'); ?>/<?= $this->get('season') + 1; ?>)
-                    </p>
-                </div>
+                <h2>Defending Champ</h2>
+                <p class="defending-champ">
+                    <?= getTeamLogoImgTag($lastYearsChamp); ?> <?= $lastYearsChamp->getName(); ?>
+                    won <?= $this->get('season') - 1; ?>/<?= $this->get('season'); ?>
+                </p>
             </div>
             
             <div class="row">
                 <h2>Rules</h2>
                 <ul>
-                    <li>It starts with the first game of last season's NBA champion.</li>
+                    <li>It starts with the first game of last season's championship belt winner.</li>
                     <li>If the belt holding team gets beat it loses the belt to the other team.</li>
                     <li>No playoffs, the race is over after the regular season.</li>
                 </ul>

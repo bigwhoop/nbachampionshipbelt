@@ -47,19 +47,19 @@ $app->get('/', function() use ($app) {
     
     $availableSeasons = [
         2000 => ['defendingChamp' => new Team('LAL')],
-        2001 => ['defendingChamp' => new Team('LAL')],
-        2002 => ['defendingChamp' => new Team('LAL')],
-        2003 => ['defendingChamp' => new Team('SAS')],
-        2004 => ['defendingChamp' => new Team('DET')],
-        2005 => ['defendingChamp' => new Team('SAS')],
-        2006 => ['defendingChamp' => new Team('MIA')],
-        2007 => ['defendingChamp' => new Team('SAS')],
-        2008 => ['defendingChamp' => new Team('BOS')],
+        2001 => ['defendingChamp' => new Team('MIA')],
+        2002 => ['defendingChamp' => new Team('DET')],
+        2003 => ['defendingChamp' => new Team('LAC')],
+        2004 => ['defendingChamp' => new Team('SAS')],
+        2005 => ['defendingChamp' => new Team('HOU')],
+        2006 => ['defendingChamp' => new Team('IND')],
+        2007 => ['defendingChamp' => new Team('UTA')],
+        2008 => ['defendingChamp' => new Team('DET')],
         2009 => ['defendingChamp' => new Team('LAL')],
-        2010 => ['defendingChamp' => new Team('LAL')],
-        2011 => ['defendingChamp' => new Team('DAL')],
-        2012 => ['defendingChamp' => new Team('MIA')],
-        2013 => ['defendingChamp' => new Team('MIA')],
+        2010 => ['defendingChamp' => new Team('CHI')],
+        2011 => ['defendingChamp' => new Team('CHI')],
+        2012 => ['defendingChamp' => new Team('NYK')],
+        2013 => ['defendingChamp' => new Team('LAC')],
     ];
     
     // Check season availability
