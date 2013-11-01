@@ -1,0 +1,7 @@
+Options -Indexes
+
+AddHandler application/x-httpd-php55 .php
+
+
+#@__HCP_END__@#
+# Anything after the comment above is left alone
