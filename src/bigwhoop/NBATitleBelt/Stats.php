@@ -10,7 +10,7 @@ class Stats implements \IteratorAggregate
     /**
      * @param Game $game
      * @param Team $currentBeltHolder
-     * @return bool     True if the game was for the belt, otherwise false.
+     * @return BeltGame|null
      */
     public function analyzeGame(Game $game, Team $currentBeltHolder)
     {
@@ -32,7 +32,7 @@ class Stats implements \IteratorAggregate
         $loser  = $game->getLoser();
         $this->assertTeamStats($loser)->recordGame(false, $currentBeltHolder->isSame($loser));
         
-        return true;
+        return new BeltGame($game, clone $currentBeltHolder, 0, 0);
     }
     
 

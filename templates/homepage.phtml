@@ -1,6 +1,7 @@
 <?php
 use bigwhoop\NBATitleBelt\Team;
 use bigwhoop\NBATitleBelt\Game;
+use bigwhoop\NBATitleBelt\BeltGame;
 use bigwhoop\NBATitleBelt\TeamStats;
 
 /** @var array $availableSeasons */
@@ -19,6 +20,15 @@ $thisYearsNBAChamp = array_key_exists($this->get('season') + 1, $availableSeason
 
 /** @var Game|null $upcomingChampGame */
 $upcomingChampGame = $this->get('upcomingGame');
+
+/** @var Game|null $upcomingChampGameIfHomeTeamWins */
+$upcomingChampGameIfHomeTeamWins = $this->get('upcomingChampGameIfHomeTeamWins');
+
+/** @var Game|null $upcomingChampGameIfAwayTeamWins */
+$upcomingChampGameIfAwayTeamWins = $this->get('upcomingChampGameIfAwayTeamWins');
+
+/** @var bool $isOngoingSeason */
+$isOngoingSeason   = $this->get('isOngoingSeason'); 
 
 /**
  * @param Team $team
@@ -74,10 +84,23 @@ function getTeamLogoImgTag(Team $team) {
             .seasons { margin: 0 0 20px 0; max-width: 400px; }
             .title-winner { font-size: 32px; }
             
-            .next-battle { text-align: center; }
+            .next-battle { margin: 30px 0; text-align: center; }
             .next-battle .matchup { font-size: 32px; margin-bottom: 8px; }
             .next-battle .matchup img { vertical-align: baseline; }
             .next-battle .date { font-size: 16px; }
+            
+            .next-battles-after-team-win { text-align: center; margin: 20px 10px; }
+            .next-battle-after-team-win {
+                display: inline-block;
+                padding: 10px;
+                margin: 0 5px;
+                background-color: #f5f5f5;
+                border-radius: 4px;
+            }
+            .next-battle-after-team-win .matchup { font-size: 16px; margin-bottom: 4px; }
+            .next-battle-after-team-win .matchup img { vertical-align: top; }
+            .next-battle-after-team-win .date { font-size: 10px; }
+            .next-battle-after-away-team-win {  }
             
             table { border-collapse: collapse; }
             th, td { border: 1px solid #666; padding: 2px 4px; text-align: left; }
@@ -86,6 +109,7 @@ function getTeamLogoImgTag(Team $team) {
             td img { vertical-align: middle; }
             tr { background-color: #fff; }
             tr:nth-child(even) { background-color: #f5f5f5; }
+            th.numeric, td.numeric { text-align: center; }
             
             .row   { float: left; margin: 0 50px 20px 0; }
             .clear { clear: left; }
@@ -121,7 +145,7 @@ function getTeamLogoImgTag(Team $team) {
             <div class="clear"></div>
             
             <div class="row">
-                <?php if ($this->get('isRunningSeason')): ?>
+                <?php if ($isOngoingSeason): ?>
                     <h2>Holder of Champ. Belt</h2>
                 <?php else: ?>
                     <h2>Winner of Champ. Belt</h2>
@@ -186,30 +210,20 @@ function getTeamLogoImgTag(Team $team) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php $lastWinner = null; $streak = 0; $wins = []; ?>
-                        <?php foreach ($this->get('gameLog') as $game): ?>
+                        <?php foreach ($this->get('gameLog') as $beltGame): ?>
                             <?php
-                            /** @var Game $game */
-                            
-                            $winnerName = $game->getWinner()->getName();
-                            if (!array_key_exists($winnerName, $wins)) {
-                                $wins[$winnerName] = 0;
-                            }
-                            $wins[$winnerName]++;
-                            if ($lastWinner != $winnerName) {
-                                $lastWinner = $winnerName;
-                                $streak = 0;
-                            }
-                            $streak++;
+                            /** @var BeltGame $beltGame */
+                            $game = $beltGame->getGame();
+                            $newBeltHolder = $beltGame->getBeltHolderAfterGame();
                             ?>
                             <tr>
                                 <td><?= $game->getDate()->format('Y-m-d'); ?></td>
                                 <td><?= $game->getHomeTeam()->getName(); ?></td>
                                 <td><?= $game->getScore();; ?></td>
                                 <td><?= $game->getAwayTeam()->getName(); ?></td>
-                                <td><?= getTeamLogoImgTag($game->getWinner()); ?> <?= $winnerName; ?></td>
-                                <td><?= $streak; ?></td>
-                                <td><?= $wins[$winnerName]; ?></td>
+                                <td><?= getTeamLogoImgTag($newBeltHolder); ?> <?= $newBeltHolder->getName(); ?></td>
+                                <td><?= $beltGame->getWinStreak(); ?></td>
+                                <td><?= $beltGame->getAccumulatedWins(); ?></td>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -229,6 +243,38 @@ function getTeamLogoImgTag(Team $team) {
                             <?= $upcomingChampGame->getDate()->format('Y-m-d'); ?>
                         </div>
                     </div>
+                    
+                    <div class="next-battles-after-team-win">
+                        <div class="next-battle-after-team-win next-battle-after-away-team-win">
+                            <?php if ($upcomingChampGameIfHomeTeamWins): ?>
+                                <div class="matchup">
+                                    <?= getTeamLogoImgTag($upcomingChampGameIfAwayTeamWins->getAwayTeam()); ?>
+                                    @
+                                    <?= getTeamLogoImgTag($upcomingChampGameIfAwayTeamWins->getHomeTeam()); ?>
+                                </div>
+                                <div class="date">
+                                    <?= $upcomingChampGameIfAwayTeamWins->getDate()->format('Y-m-d'); ?>
+                                </div>
+                            <?php else: ?>
+                                <p>No more games!</p>
+                            <?php endif; ?>
+                        </div>
+                    
+                        <div class="next-battle-after-team-win next-battle-after-home-team-win">
+                            <?php if ($upcomingChampGameIfHomeTeamWins): ?>
+                                <div class="matchup">
+                                    <?= getTeamLogoImgTag($upcomingChampGameIfHomeTeamWins->getAwayTeam()); ?>
+                                    @
+                                    <?= getTeamLogoImgTag($upcomingChampGameIfHomeTeamWins->getHomeTeam()); ?>
+                                </div>
+                                <div class="date">
+                                    <?= $upcomingChampGameIfHomeTeamWins->getDate()->format('Y-m-d'); ?>
+                                </div>
+                            <?php else: ?>
+                                <p>No more games!</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
             
@@ -239,18 +285,18 @@ function getTeamLogoImgTag(Team $team) {
                         <tr>
                             <th rowspan="2">Rank</th>
                             <th rowspan="2">Team</th>
-                            <th rowspan="2">Games</th>
-                            <th colspan="3">Wins</th>
-                            <th colspan="3">Losses</th>
+                            <th rowspan="2" class="numeric">Games</th>
+                            <th colspan="3" class="numeric">Wins</th>
+                            <th colspan="3" class="numeric">Losses</th>
                             <th rowspan="2">Win %</th>
                         </tr>
                         <tr>
-                            <th>Total</th>
-                            <th><small>As Challenger</small></th>
-                            <th><small>As Defender</small></th>
-                            <th>Total</th>
-                            <th><small>As Challenger</small></th>
-                            <th><small>As Defender</small></th>
+                            <th class="numeric">Total</th>
+                            <th class="numeric"><small title="As Challenger">As Chall.</small></th>
+                            <th class="numeric"><small title="As Defender">As Def.</small></th>
+                            <th class="numeric">Total</th>
+                            <th class="numeric"><small title="As Challenger">As Chall.</small></th>
+                            <th class="numeric"><small title="As Defender">As Def.</small></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -272,13 +318,13 @@ function getTeamLogoImgTag(Team $team) {
                                     ?>
                                 </td>
                                 <td><?= getTeamLogoImgTag($teamStats->getTeam()); ?> <?= $teamStats->getTeam()->getName(); ?></td>
-                                <td><?= $numGames; ?></td>
-                                <td><?= $teamStats->countWins(); ?></td>
-                                <td><?= $teamStats->countWinsAsChallenger(); ?></td>
-                                <td><?= $teamStats->countWinsAsDefender(); ?></td>
-                                <td><?= $teamStats->countLosses(); ?></td>
-                                <td><?= $teamStats->countLossesAsChallenger(); ?></td>
-                                <td><?= $teamStats->countLossesAsDefender(); ?></td>
+                                <td class="numeric"><?= $numGames; ?></td>
+                                <td class="numeric"><?= $teamStats->countWins(); ?></td>
+                                <td class="numeric"><small><?= $teamStats->countWinsAsChallenger(); ?></small></td>
+                                <td class="numeric"><small><?= $teamStats->countWinsAsDefender(); ?></small></td>
+                                <td class="numeric"><?= $teamStats->countLosses(); ?></td>
+                                <td class="numeric"><small><?= $teamStats->countLossesAsChallenger(); ?></small></td>
+                                <td class="numeric"><small><?= $teamStats->countLossesAsDefender(); ?></small></td>
                                 <td><?= $winPercentage; ?>%</td>
                         <?php endforeach; ?>
                     </tbody>

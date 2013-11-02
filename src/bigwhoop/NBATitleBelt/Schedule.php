@@ -32,12 +32,16 @@ class Schedule implements \IteratorAggregate
 
     /**
      * @param Team $beltHolder
+     * @param Team|null $butNotAgainstTeam
      * @return Game|null
      */
-    public function getUpcomingChampionshipGame(Team $beltHolder)
+    public function getUpcomingChampionshipGame(Team $beltHolder, Team $butNotAgainstTeam = null)
     {
         foreach ($this->games as $game) {
             if ($game->wasPlayed()) {
+                continue;
+            }
+            if ($butNotAgainstTeam && $butNotAgainstTeam->isPlayingIn($game)) {
                 continue;
             }
             if ($beltHolder->isPlayingIn($game)) {

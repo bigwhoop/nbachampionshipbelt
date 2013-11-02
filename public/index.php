@@ -89,14 +89,25 @@ $app->get('/', function() use ($app) {
     $beltHolder = $availableSeasons[$season]['defendingChamp'];
     foreach ($schedule as $game) {
         /** @var Game $game */
-        if ($stats->analyzeGame($game, $beltHolder)) {
-            $gameLog->addGame($game);
-            $beltHolder = $game->getWinner();
+        if (($beltGame = $stats->analyzeGame($game, $beltHolder))) {
+            $gameLog->addGame($beltGame);
+            $beltHolder = $beltGame->getBeltHolderAfterGame();
         }
     }
     
+    $upcomingChampGame = $schedule->getUpcomingChampionshipGame($beltHolder);
+    $upcomingChampGameIfHomeTeamWins = $upcomingChampGameIfAwayTeamWins = null;
+    if ($upcomingChampGame) {
+        $upcomingChampGameIfHomeTeamWins = $schedule->getUpcomingChampionshipGame($upcomingChampGame->getHomeTeam(), $upcomingChampGame->getAwayTeam());
+        $upcomingChampGameIfAwayTeamWins = $schedule->getUpcomingChampionshipGame($upcomingChampGame->getAwayTeam(), $upcomingChampGame->getHomeTeam());
+    }
+    
+    // This is a bit hacky, but we don't have a DB or anything to store the current leader ...
     if ($season == CURRENT_SEASON) {
-        file_put_contents(__DIR__ . '/../public/leader.json', json_encode(['name' => $beltHolder->getName()]));
+        $data = [
+            'name' => $beltHolder->getName(),
+        ];
+        file_put_contents(__DIR__ . '/../public/leader.json', json_encode($data));
     }
     
     $view = $app->view();
@@ -105,10 +116,12 @@ $app->get('/', function() use ($app) {
         'season'           => $season,
         'availableSeasons' => $availableSeasons,
         'beltHolder'       => $beltHolder,
-        'isRunningSeason'  => $season == CURRENT_SEASON,
+        'isOngoingSeason'  => $season == CURRENT_SEASON,
         'stats'            => $stats,
         'gameLog'          => $gameLog,
-        'upcomingGame'     => $schedule->getUpcomingChampionshipGame($beltHolder),
+        'upcomingGame'     => $upcomingChampGame,
+        'upcomingChampGameIfHomeTeamWins' => $upcomingChampGameIfHomeTeamWins,
+        'upcomingChampGameIfAwayTeamWins' => $upcomingChampGameIfAwayTeamWins,
     ]);
     
     $content = $view->fetch('homepage.phtml');
