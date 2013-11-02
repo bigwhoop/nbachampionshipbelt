@@ -1,6 +1,7 @@
 <?php
 use bigwhoop\NBATitleBelt\Team;
 use bigwhoop\NBATitleBelt\Game;
+use bigwhoop\NBATitleBelt\TeamStats;
 
 /** @var array $availableSeasons */
 $availableSeasons  = $this->get('availableSeasons');
@@ -276,7 +277,7 @@ function getTeamLogoImgTag(Team $team) {
                                 <td><?= $teamStats->countWinsAsChallenger(); ?></td>
                                 <td><?= $teamStats->countWinsAsDefender(); ?></td>
                                 <td><?= $teamStats->countLosses(); ?></td>
-                                <td><?= $teamStats->countWinsAsChallenger(); ?></td>
+                                <td><?= $teamStats->countLossesAsChallenger(); ?></td>
                                 <td><?= $teamStats->countLossesAsDefender(); ?></td>
                                 <td><?= $winPercentage; ?>%</td>
                         <?php endforeach; ?>
