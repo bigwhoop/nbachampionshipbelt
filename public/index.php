@@ -40,26 +40,33 @@ $app->configureMode('production', function() use ($app) {
 });
 
 $app->get('/', function() use ($app) {
-    $season = (int)$app->request()->get('season');
+    $season = $app->request()->get('season');
+    if ($season !== 'all') {
+        $season = (int)$season;
+    }
+    
     if ($season === 0) {
         $season = CURRENT_SEASON;
     }
     
     $availableSeasons = [
-        2000 => ['defendingChamp' => new Team('LAL')],
-        2001 => ['defendingChamp' => new Team('LAL')],
-        2002 => ['defendingChamp' => new Team('LAL')],
-        2003 => ['defendingChamp' => new Team('SAS')],
-        2004 => ['defendingChamp' => new Team('DET')],
-        2005 => ['defendingChamp' => new Team('SAS')],
-        2006 => ['defendingChamp' => new Team('MIA')],
-        2007 => ['defendingChamp' => new Team('SAS')],
-        2008 => ['defendingChamp' => new Team('BOS')],
-        2009 => ['defendingChamp' => new Team('LAL')],
-        2010 => ['defendingChamp' => new Team('LAL')],
-        2011 => ['defendingChamp' => new Team('DAL')],
-        2012 => ['defendingChamp' => new Team('MIA')],
-        2013 => ['defendingChamp' => new Team('MIA')],
+        // Seasons 1950/51 - 2013/14. Minneapolis Lakers won 1949/50 and are the defending champs.
+        'all' => ['defendingChamp' => new Team('LAL', 'Minneapolis Lakers')],
+        
+        2000 => ['defendingChamp' => new Team('LAL', 'Los Angeles Lakers')],
+        2001 => ['defendingChamp' => new Team('LAL', 'Los Angeles Lakers')],
+        2002 => ['defendingChamp' => new Team('LAL', 'Los Angeles Lakers')],
+        2003 => ['defendingChamp' => new Team('SAS', 'San Antonio Spurs')],
+        2004 => ['defendingChamp' => new Team('DET', 'Detroit Pistons')],
+        2005 => ['defendingChamp' => new Team('SAS', 'San Antonio Spurs')],
+        2006 => ['defendingChamp' => new Team('MIA', 'Miami Heat')],
+        2007 => ['defendingChamp' => new Team('SAS', 'San Antonio Spurs')],
+        2008 => ['defendingChamp' => new Team('BOS', 'Boston Celtics')],
+        2009 => ['defendingChamp' => new Team('LAL', 'Los Angeles Lakers')],
+        2010 => ['defendingChamp' => new Team('LAL', 'Los Angeles Lakers')],
+        2011 => ['defendingChamp' => new Team('DAL', 'Dallas Mavericks')],
+        2012 => ['defendingChamp' => new Team('MIA', 'Miami Heat')],
+        2013 => ['defendingChamp' => new Team('MIA', 'Miami Heat')],
     ];
     
     // Check season availability
@@ -77,6 +84,9 @@ $app->get('/', function() use ($app) {
     
     try {
         $parser = new BBReferenceParser(__DIR__ . '/../data/' . $season . '.csv');
+        if ($season === 'all') {
+            $parser->setMode($parser::MODE_FRANCHISES);
+        }
         $games = $parser->getGames();
     } catch (\RuntimeException $e) {
         $games = [];
@@ -105,6 +115,7 @@ $app->get('/', function() use ($app) {
     // This is a bit hacky, but we don't have a DB or anything to store the current leader ...
     if ($season == CURRENT_SEASON) {
         $data = [
+            'id'   => $beltHolder->getID(),
             'name' => $beltHolder->getName(),
         ];
         file_put_contents(__DIR__ . '/../public/leader.json', json_encode($data));
@@ -116,7 +127,7 @@ $app->get('/', function() use ($app) {
         'season'           => $season,
         'availableSeasons' => $availableSeasons,
         'beltHolder'       => $beltHolder,
-        'isOngoingSeason'  => $season == CURRENT_SEASON,
+        'isOngoingSeason'  => $season == CURRENT_SEASON || $season === 'all',
         'stats'            => $stats,
         'gameLog'          => $gameLog,
         'upcomingGame'     => $upcomingChampGame,

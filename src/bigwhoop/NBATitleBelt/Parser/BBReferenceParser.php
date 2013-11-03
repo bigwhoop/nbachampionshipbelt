@@ -6,6 +6,9 @@ use bigwhoop\NBATitleBelt\Team;
 
 class BBReferenceParser implements ParserInterface
 {
+    const MODE_TEAMS      = 1; // New Jersey Nets and Brooklyn Nets are not the same
+    const MODE_FRANCHISES = 2; // New Jersey Nets are represented as Brooklyn Nets
+    
     /** @var array */
     private static $teams = [
         'Washington Wizards' => 'WAS',
@@ -46,9 +49,69 @@ class BBReferenceParser implements ParserInterface
         'Vancouver Grizzlies' => 'VAN',
     ];
     
+    /** @var array */
+    private static $franchises = [
+        'ATL' => ['Atlanta Hawks', 'St. Louis Hawks', 'Milwaukee Hawks', 'Tri-Cities Blackhawks'],
+        'BOS' => ['Boston Celtics'],
+        'BKN' => ['Brooklyn Nets', 'New Jersey Nets', 'New York Nets'],
+        'CHA' => ['Charlotte Bobcats'],
+        'CHI' => ['Chicago Bulls'],
+        'CLE' => ['Cleveland Cavaliers'],
+        'DAL' => ['Dallas Mavericks'],
+        'DEN' => ['Denver Nuggets'],
+        'DET' => ['Detroit Pistons', 'Fort Wayne Pistons'],
+        'GSW' => ['Golden State Warriors', 'San Francisco Warriors', 'Philadelphia Warriors'],
+        'HOU' => ['Houston Rockets', 'San Diego Rockets'],
+        'IND' => ['Indiana Pacers'],
+        'LAC' => ['Los Angeles Clippers', 'San Diego Clippers', 'Buffalo Braves'],
+        'LAL' => ['Los Angeles Lakers', 'Minneapolis Lakers'],
+        'MEM' => ['Memphis Grizzlies', 'Vancouver Grizzlies'],
+        'MIA' => ['Miami Heat'],
+        'MIL' => ['Milwaukee Bucks'],
+        'MIN' => ['Minnesota Timberwolves'],
+        'NOP' => ['New Orleans Pelicans', 'New Orleans Hornets', 'New Orleans/Oklahoma City Hornets', 'Charlotte Hornets'],
+        'NYK' => ['New York Knicks'],
+        'OKC' => ['Oklahoma City Thunder', 'Seattle SuperSonics'],
+        'ORL' => ['Orlando Magic'],
+        'PHI' => ['Philadelphia 76ers', 'Syracuse Nationals'],
+        'PHX' => ['Phoenix Suns'],
+        'POR' => ['Portland Trail Blazers'],
+        'SAC' => ['Sacramento Kings', 'Kansas City Kings', 'Kansas City-Omaha Kings', 'Cincinnati Royals', 'Rochester Royals'],
+        'SAS' => ['San Antonio Spurs'],
+        'TOR' => ['Toronto Raptors'],
+        'UTA' => ['Utah Jazz', 'New Orleans Jazz'],
+        'WAS' => ['Washington Wizards', 'Washington Bullets', 'Capital Bullets', 'Baltimore Bullets', 'Chicago Zephyrs', 'Chicago Packers'],
+        // ---
+        'AND' => ['Anderson Packers'],
+        'BLB' => ['Baltimore Bullets'],
+        'CHS' => ['Chicago Stags'],
+        'DNN' => ['Denver Nuggets'],
+        'INO' => ['Indianapolis Olympians'],
+        'SHE' => ['Sheboygan Red Skins'],
+        'STB' => ['St. Louis Bombers'],
+        'WSH' => ['Washington Capitols'],
+        'WAT' => ['Waterloo Hawks'],
+    ];
+    
     
     /** @var string */
     private $csvPath = '';
+
+    /** @var int */
+    private $mode = self::MODE_TEAMS;
+
+
+    /**
+     * @return Team[]
+     */
+    static public function getFranchises()
+    {
+        $teams = [];
+        foreach (self::$franchises as $id => $names) {
+            $teams[] = new Team($id, $names);
+        }
+        return $teams;
+    }
     
     
     /**
@@ -57,6 +120,17 @@ class BBReferenceParser implements ParserInterface
     public function __construct($csvPath)
     {
         $this->csvPath = $csvPath;
+    }
+
+
+    /**
+     * @param int $mode
+     * @return $this
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+        return $this;
     }
 
 
@@ -82,6 +156,46 @@ class BBReferenceParser implements ParserInterface
 
 
     /**
+     * @param string $teamName
+     * @return Team
+     */
+    private function getTeam($teamName)
+    {
+        $id = $this->getTeamId($teamName);
+        return new Team($id, self::$franchises[$id]);
+    }
+
+
+    /**
+     * @param string $teamName
+     * @return string
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
+    private function getTeamId($teamName)
+    {
+        switch ($this->mode)
+        {
+            case self::MODE_TEAMS:
+                if (!array_key_exists($teamName, self::$teams)) {
+                    throw new \RuntimeException("Team ID for '$teamName' is not defined.");
+                }
+                return self::$teams[$teamName];
+            
+            case self::MODE_FRANCHISES:
+                foreach (self::$franchises as $key => $teamNames) {
+                    if (in_array($teamName, $teamNames)) {
+                        return $key;
+                    }
+                }
+                throw new \RuntimeException("Team ID for '$teamName' is not defined.");
+            
+            default: throw new \LogicException("Unexpected mode: {$this->mode}.");
+        }
+    }
+
+
+    /**
      * @return Game[]
      */
     public function getGames()
@@ -93,10 +207,10 @@ class BBReferenceParser implements ParserInterface
             list($dateStr,,$homeTeamStr,$homeTeamScore,$awayTeamStr,$awayTeamScore) = $row;
             $games[] = new Game(
                 \DateTime::createFromFormat('D, M j, Y H:i:s', $dateStr . ' 00:00:00'),
-                new Team(self::$teams[$homeTeamStr]),
-                $homeTeamScore,
-                new Team(self::$teams[$awayTeamStr]),
-                $awayTeamScore
+                $this->getTeam($homeTeamStr),
+                (int)$homeTeamScore,
+                $this->getTeam($awayTeamStr),
+                (int)$awayTeamScore
             );
         }
         

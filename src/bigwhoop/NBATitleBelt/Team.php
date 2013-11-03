@@ -4,15 +4,38 @@ namespace bigwhoop\NBATitleBelt;
 class Team
 {
     /** @var string  */
+    private $id = '';
+    
+    /** @var string  */
     private $name = '';
+    
+    /** @var array */
+    private $alternativeNames = [];
 
 
     /**
-     * @param string $name
+     * @param string $id    3-digit team ID like MIA or LAL
+     * @param string|array $name
      */
-    public function __construct($name)
+    public function __construct($id, $name)
     {
-        $this->name = $name;
+        $this->id = $id;
+        
+        if (is_array($name)) {
+            $this->name = $name[0];
+            $this->alternativeNames = array_slice($name, 1);
+        } else {
+            $this->name = $name;
+        }
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getID()
+    {
+        return $this->id;
     }
 
 
@@ -26,12 +49,21 @@ class Team
 
 
     /**
+     * @return array
+     */
+    public function getAlternativeNames()
+    {
+        return $this->alternativeNames;
+    }
+
+
+    /**
      * @param Team $team
      * @return bool
      */
     public function isSame(Team $team)
     {
-        return $this->getName() == $team->getName();
+        return $this->getID() == $team->getID();
     }
 
 
