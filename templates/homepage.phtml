@@ -1,11 +1,15 @@
 <?php
 use bigwhoop\NBATitleBelt\Team;
 use bigwhoop\NBATitleBelt\Game;
+use bigwhoop\NBATitleBelt\GameLog;
 use bigwhoop\NBATitleBelt\BeltGame;
 use bigwhoop\NBATitleBelt\TeamStats;
 
 /** @var array $availableSeasons */
 $availableSeasons  = $this->get('availableSeasons');
+
+/** @var GameLog $gameLog */
+$gameLog           = $this->get('gameLog');
 
 /** @var Team $beltHolder */
 $beltHolder        = $this->get('beltHolder');
@@ -160,6 +164,7 @@ function getSeasonName($season) {
                 
                 <p class="seasons">
                     <?php foreach (array_keys($availableSeasons) as $season): ?>
+                        <?php if ($season === 'all') { continue; } ?> 
                         <?php if ($season == $this->get('season')): ?>
                             <?= getSeasonName($season); ?>
                         <?php else: ?>
@@ -229,38 +234,64 @@ function getSeasonName($season) {
         
             <div class="row">
                 <h2>Game Log</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Home Team</th>
-                            <th>Score</th>
-                            <th>Away Team</th>
-                            <th>Winner</th>
-                            <th>Streak</th>
-                            <th>Wins</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($this->get('gameLog') as $idx => $beltGame): ?>
+                <?php if ($this->get('season') === 'all'): ?>
+                    <div style="max-width: 800px;">
+                        <?php $beltGames = $gameLog->getGames(); ?>
+                        <?php for ($i = 0, $c = count($beltGames); $i < $c; $i++): ?>
                             <?php
-                            /** @var BeltGame $beltGame */
-                            $game = $beltGame->getGame();
-                            $newBeltHolder = $beltGame->getBeltHolderAfterGame();
+                            $firstGame = $beltGames[$i];
+                            $lastGame  = $firstGame;
+                            $newBeltHolder = $firstGame->getBeltHolderAfterGame();
+                            
+                            while (array_key_exists($i + 1, $beltGames)) {
+                                $nextBeltGame = $beltGames[$i + 1];
+                                if ($nextBeltGame->getBeltHolderAfterGame()->isSame($newBeltHolder)) {
+                                    $lastGame = $nextBeltGame;
+                                    $i++;
+                                } else {
+                                    break;
+                                }
+                            }
                             ?>
+                            <div style="float: left; height: 22px; width: <?= $lastGame->getWinStreak() * 8; ?>px; background: url(<?= getTeamLogoURL($newBeltHolder); ?>) center;"
+                                 title="<?= $newBeltHolder->getName() . ': ' . $lastGame->getWinStreak() . ' games (' . $firstGame->getGame()->getDate()->format('Y-m-d') . ' - ' . $lastGame->getGame()->getDate()->format('Y-m-d') . ')'; ?>"></div>
+                        <?php endfor; ?>
+                    </div>
+                    <div class="clear"></div>
+                <?php else: ?>
+                    <table>
+                        <thead>
                             <tr>
-                                <td><?= $idx + 1; ?></td>
-                                <td><?= $game->getDate()->format('Y-m-d'); ?></td>
-                                <td><?= $game->getHomeTeam()->getID(); ?></td>
-                                <td><?= $game->getScore();; ?></td>
-                                <td><?= $game->getAwayTeam()->getID(); ?></td>
-                                <td><?= getTeamLogoImgTag($newBeltHolder); ?> <?= $newBeltHolder->getID(); ?></td>
-                                <td><?= $beltGame->getWinStreak(); ?></td>
-                                <td><?= $beltGame->getAccumulatedWins(); ?></td>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Home Team</th>
+                                <th>Score</th>
+                                <th>Away Team</th>
+                                <th>Winner</th>
+                                <th>Streak</th>
+                                <th>Wins</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($gameLog as $idx => $beltGame): ?>
+                                <?php
+                                /** @var BeltGame $beltGame */
+                                $game = $beltGame->getGame();
+                                $newBeltHolder = $beltGame->getBeltHolderAfterGame();
+                                ?>
+                                <tr>
+                                    <td><?= $idx + 1; ?></td>
+                                    <td><?= $game->getDate()->format('Y-m-d'); ?></td>
+                                    <td><?= $game->getHomeTeam()->getID(); ?></td>
+                                    <td><?= $game->getScore();; ?></td>
+                                    <td><?= $game->getAwayTeam()->getID(); ?></td>
+                                    <td><?= getTeamLogoImgTag($newBeltHolder); ?> <?= $newBeltHolder->getID(); ?></td>
+                                    <td><?= $beltGame->getWinStreak(); ?></td>
+                                    <td><?= $beltGame->getAccumulatedWins(); ?></td>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
                 
                 <?php if ($upcomingChampGame): ?>
                     <div class="next-battle">

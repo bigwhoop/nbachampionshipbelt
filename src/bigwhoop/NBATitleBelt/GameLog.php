@@ -38,6 +38,15 @@ class GameLog implements \IteratorAggregate
         
         return $this;
     }
+
+
+    /**
+     * @return BeltGame[]
+     */
+    public function getGames()
+    {
+        return $this->games;
+    }
     
 
     /**
