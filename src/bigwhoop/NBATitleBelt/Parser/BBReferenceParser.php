@@ -204,7 +204,7 @@ class BBReferenceParser implements ParserInterface
         
         $games = [];
         foreach ($data as $row) {
-            list($dateStr,,$homeTeamStr,$homeTeamScore,$awayTeamStr,$awayTeamScore) = $row;
+            list($dateStr,,$awayTeamStr,$awayTeamScore,$homeTeamStr,$homeTeamScore) = $row;
             $games[] = new Game(
                 \DateTime::createFromFormat('D, M j, Y H:i:s', $dateStr . ' 00:00:00'),
                 $this->getTeam($homeTeamStr),
