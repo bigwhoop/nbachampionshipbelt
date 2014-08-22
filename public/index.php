@@ -1,7 +1,7 @@
 <?php
 namespace App;
 
-const CURRENT_SEASON = 2013;
+const CURRENT_SEASON = 2014;
 
 date_default_timezone_set('UTC');
 
@@ -67,6 +67,7 @@ $app->get('/', function() use ($app) {
         2011 => ['defendingChamp' => new Team('DAL', 'Dallas Mavericks')],
         2012 => ['defendingChamp' => new Team('MIA', 'Miami Heat')],
         2013 => ['defendingChamp' => new Team('MIA', 'Miami Heat')],
+        2014 => ['defendingChamp' => new Team('SAS', 'San Antonio Spurs')],
     ];
     
     // Check season availability

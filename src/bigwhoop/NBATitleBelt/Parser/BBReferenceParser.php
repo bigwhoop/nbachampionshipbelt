@@ -36,7 +36,7 @@ class BBReferenceParser implements ParserInterface
         'Oklahoma City Thunder' => 'OKC',
         'Atlanta Hawks' => 'ATL',
         'Milwaukee Bucks' => 'MIL',
-        'Charlotte Bobcats' => 'CHA',
+        'Charlotte Hornets' => 'CHA',
         'Minnesota Timberwolves' => 'MIN',
         'New York Knicks' => 'NYK',
         'Orlando Magic' => 'ORL',
@@ -45,8 +45,8 @@ class BBReferenceParser implements ParserInterface
         'New Orleans Pelicans' => 'NOP',
         'New Orleans/Oklahoma City Hornets' => 'NOK',
         'Seattle SuperSonics' => 'SEA',
-        'Charlotte Hornets' => 'CHH',
         'Vancouver Grizzlies' => 'VAN',
+        'Charlotte Bobcats'   => 'CHA',
     ];
     
     /** @var array */
@@ -54,7 +54,7 @@ class BBReferenceParser implements ParserInterface
         'ATL' => ['Atlanta Hawks', 'St. Louis Hawks', 'Milwaukee Hawks', 'Tri-Cities Blackhawks'],
         'BOS' => ['Boston Celtics'],
         'BKN' => ['Brooklyn Nets', 'New Jersey Nets', 'New York Nets'],
-        'CHA' => ['Charlotte Bobcats'],
+        'CHA' => ['Charlotte Hornets', 'Charlotte Bobcats'],
         'CHI' => ['Chicago Bulls'],
         'CLE' => ['Cleveland Cavaliers'],
         'DAL' => ['Dallas Mavericks'],
@@ -69,7 +69,7 @@ class BBReferenceParser implements ParserInterface
         'MIA' => ['Miami Heat'],
         'MIL' => ['Milwaukee Bucks'],
         'MIN' => ['Minnesota Timberwolves'],
-        'NOP' => ['New Orleans Pelicans', 'New Orleans Hornets', 'New Orleans/Oklahoma City Hornets', 'Charlotte Hornets'],
+        'NOP' => ['New Orleans Pelicans', 'New Orleans Hornets', 'New Orleans/Oklahoma City Hornets'],
         'NYK' => ['New York Knicks'],
         'OKC' => ['Oklahoma City Thunder', 'Seattle SuperSonics'],
         'ORL' => ['Orlando Magic'],

@@ -10,14 +10,16 @@ if (!isset($argv[1])) {
     exit("First parameter must be the year of the seasons you want to scrape.\n");
 }
 
+define('CURRENT_SEASON', 2014);
+
 $season = $argv[1];
 
 if ($season == 'all') {
-    $seasons = range(1950, 2013);
+    $seasons = range(1950, CURRENT_SEASON);
 } else {
     $season = (int)$season;
-    if ($season < 1950 || $season > 2013) {
-        exit("The season must be between 1950 and 2013.\n");
+    if ($season < 1950 || $season > CURRENT_SEASON) {
+        exit("The season must be between 1950 and " . CURRENT_SEASON . ".\n");
     }
     $seasons = [$season];
 }
