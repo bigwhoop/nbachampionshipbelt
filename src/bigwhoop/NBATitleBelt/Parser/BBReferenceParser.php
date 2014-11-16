@@ -82,6 +82,11 @@ class BBReferenceParser implements ParserInterface
         'UTA' => ['Utah Jazz', 'New Orleans Jazz'],
         'WAS' => ['Washington Wizards', 'Washington Bullets', 'Capital Bullets', 'Baltimore Bullets', 'Chicago Zephyrs', 'Chicago Packers'],
         // ---
+        'SEA' => ['Seattle SuperSonics'],
+        'VAN' => ['Vancouver Grizzlies'],
+        'NJN' => ['New Jersey Nets'],
+        'NOH' => ['New Orleans Hornets'],
+        'NOK' => ['New Orleans/Oklahoma City Hornets'],        
         'AND' => ['Anderson Packers'],
         'BLB' => ['Baltimore Bullets'],
         'CHS' => ['Chicago Stags'],
