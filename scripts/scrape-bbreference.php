@@ -10,7 +10,7 @@ if (!isset($argv[1])) {
     exit("First parameter must be the year of the seasons you want to scrape.\n");
 }
 
-define('CURRENT_SEASON', 2014);
+define('CURRENT_SEASON', 2015);
 
 $season = $argv[1];
 
