@@ -1,6 +1,8 @@
 # NBA Championship Belt
 
-[www.nbachampionshipbelt.com/](http://www.nbachampionshipbelt.com/)
+[www.nbachampionshipbelt.com/](http://www.nbachampionshipbelt.com/) (EXPIRED)
+
+**Don't judge**, this thing was initially hacked together in an evening ... ;-)
 
 ## Prerequisites
 
